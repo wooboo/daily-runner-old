@@ -93,7 +93,6 @@ Tomek`);
             onChange={(o) => setTime(parseInt(o.target.valueAsNumber))}
           />
         </label>
-        <br />
         <Button onClick={randomize}>Randomize</Button>
         <Button onClick={skip}>Skip</Button>
         <Button onClick={play}>{pause ? "Play" : "Pause"}</Button>

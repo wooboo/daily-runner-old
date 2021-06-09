@@ -1,5 +1,6 @@
-import { Button, Input, InputNumber, Progress } from "antd";
+import { Button, Input, InputNumber, Progress, Row, Col, Space } from "antd";
 import "antd/dist/antd.css";
+import "./App.css";
 import React, { useEffect, useState } from "react";
 
 const { TextArea } = Input;
@@ -25,15 +26,13 @@ function shuffle(array) {
 const interval = 1000;
 function App() {
   // Create the count state.
-  const [developersInput, setDevelopersInput] = useState(`Damian D.
-Piotr
-Damian P.
-Niklas
-Michał
-Victor
-Tomek`);
+  const [developersInput, setDevelopersInput] = useState(
+    localStorage.getItem("developers")
+  );
   const [developers, setDevelopers] = useState([]);
-  const [time, setTime] = useState(15 * 60);
+  const [time, setTime] = useState(
+    JSON.parse(localStorage.getItem("time") ?? "0")
+  );
   const [pause, setPause] = useState(false);
   const [index, setIndex] = useState(0);
   const [timerFull, setTimerFull] = useState(0);
@@ -64,6 +63,11 @@ Tomek`);
     }
   }, [timer, time, developers]);
 
+  useEffect(() => {
+    localStorage.setItem("time", JSON.stringify(time));
+    localStorage.setItem("developers", developersInput);
+  }, [time, developersInput]);
+
   const randomize = () => {
     setDevelopersInput(shuffle(developers).join("\n"));
   };
@@ -75,35 +79,51 @@ Tomek`);
   };
   return (
     <div className="App">
-      <header className="App-header">
-        <label>
-          Developers
+      <Row gutter={10}>
+        <Col span={12}>
           <TextArea
-            rows={10}
-            cols={15}
+            rows={8}
             value={developersInput}
             onChange={(o) => setDevelopersInput(o.target.value)}
           ></TextArea>
-        </label>
-        <label>
-          Time
-          <InputNumber
-            placeholder="provide daily time"
-            value={time}
-            onChange={(o) => setTime(parseInt(o.target.valueAsNumber))}
-          />
-        </label>
-        <Button onClick={randomize}>Randomize</Button>
-        <Button onClick={skip}>Skip</Button>
-        <Button onClick={play}>{pause ? "Play" : "Pause"}</Button>
-        <br />
-        <Progress
-          type="circle"
-          format={() => developers[index]}
-          width={400}
-          percent={Math.round((timer / timerFull) * 100)}
-        ></Progress>
-      </header>
+        </Col>
+        <Col span={12}>
+          <label>
+            Time
+            <InputNumber
+              placeholder="provide daily time"
+              value={time / 60}
+              onChange={(o) => setTime(o * 60)}
+            />
+          </label>
+          <Button block type="primary" onClick={randomize}>
+            Randomize
+          </Button>
+          <Button block danger onClick={skip}>
+            Skip
+          </Button>
+          <Button block danger type="primary" onClick={play}>
+            {pause ? "Play" : "Pause"}
+          </Button>
+        </Col>
+      </Row>
+      <Progress
+        type="dashboard"
+        format={() => (
+          <>
+            {developers[index]}
+            <br />
+            {timer}s
+          </>
+        )}
+        status={timer / timerFull > 0.15 ? "normal" : "exception"}
+        width={300}
+        strokeColor={{
+          "0%": "#108ee9",
+          "100%": "#87d068",
+        }}
+        percent={Math.round((timer / timerFull) * 100)}
+      ></Progress>
     </div>
   );
 }

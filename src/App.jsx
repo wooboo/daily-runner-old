@@ -36,6 +36,7 @@ function App() {
   const [pause, setPause] = useState(false);
   const [index, setIndex] = useState(0);
   const [timerFull, setTimerFull] = useState(0);
+  const [globalTimer, setGlobalTimer] = useState(0);
   const [timer, setTimer] = useState(0);
   useEffect(() => {
     setDevelopers(developersInput.split("\n"));
@@ -44,13 +45,15 @@ function App() {
   useEffect(() => {
     setTimer(Math.round(time / developers.length));
     setTimerFull(Math.round(time / developers.length));
+    setGlobalTimer(time);
     setIndex(0);
   }, [developers, setIndex, setTimer, time]);
 
   useEffect(() => {
     const t = setTimeout(() => {
       if (pause) return;
-      setTimer(timer - 1);
+      setTimer((m) => m - 1);
+      setGlobalTimer((m) => m - 1);
     }, interval);
     return () => {
       clearTimeout(t);
@@ -107,23 +110,38 @@ function App() {
           </Button>
         </Col>
       </Row>
-      <Progress
-        type="dashboard"
-        format={() => (
-          <>
-            {developers[index]}
-            <br />
-            {timer}s
-          </>
-        )}
-        status={timer / timerFull > 0.15 ? "normal" : "exception"}
-        width={300}
-        strokeColor={{
-          "0%": "#108ee9",
-          "100%": "#87d068",
-        }}
-        percent={Math.round((timer / timerFull) * 100)}
-      ></Progress>
+      <div className="App-progress">
+        <Progress
+          type="dashboard"
+          format={() => (
+            <Progress
+              type="dashboard"
+              format={() => (
+                <>
+                  {developers[index]}
+                  <br />
+                  {timer}s
+                </>
+              )}
+              status={timer / timerFull > 0.15 ? "normal" : "exception"}
+              width={275}
+              strokeColor={{
+                "0%": "#108ee9",
+                "100%": "#87d068",
+              }}
+              strokeWidth={6}
+              percent={Math.round((timer / timerFull) * 100)}
+            ></Progress>
+          )}
+          width={300}
+          strokeColor={{
+            "0%": "#108ee9",
+            "100%": "#87d068",
+          }}
+          strokeWidth={1}
+          percent={Math.round((globalTimer / time) * 100)}
+        ></Progress>
+      </div>
     </div>
   );
 }

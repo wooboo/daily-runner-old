@@ -51,18 +51,20 @@ function App() {
 
   useEffect(() => {
     const t = setTimeout(() => {
-      if (pause) return;
-      setTimer((m) => m - 1);
+      if (!pause) {
+        setTimer((m) => m - 1);
+      }
       setGlobalTimer((m) => m - 1);
     }, interval);
     return () => {
       clearTimeout(t);
     };
-  }, [index, timer, setTimer, pause]);
+  }, [index, timer, globalTimer, setTimer, pause]);
   useEffect(() => {
     if (timer <= 0) {
-      setTimer(Math.round(time / developers.length));
-      setIndex((i) => i + 1);
+      // setTimer(Math.round(time / developers.length));
+      setPause(true);
+      // setIndex((i) => i + 1);
     }
   }, [timer, time, developers]);
 
@@ -75,7 +77,9 @@ function App() {
     setDevelopersInput(shuffle(developers).join("\n"));
   };
   const skip = () => {
-    setTimer(0);
+    setIndex((i) => i + 1);
+    setTimer(Math.round(time / developers.length));
+    setPause(false);
   };
   const play = () => {
     setPause((p) => !p);
@@ -92,22 +96,25 @@ function App() {
         </Col>
         <Col span={12}>
           <label>
-            Time
-            <InputNumber
-              placeholder="provide daily time"
-              value={time / 60}
-              onChange={(o) => setTime(o * 60)}
-            />
+            <InputNumber value={time / 60} onChange={(o) => setTime(o * 60)} />
+            minutes
           </label>
-          <Button block type="primary" onClick={randomize}>
+          <Button block onClick={randomize}>
             Randomize
           </Button>
-          <Button block danger onClick={skip}>
-            Skip
-          </Button>
-          <Button block danger type="primary" onClick={play}>
-            {pause ? "Play" : "Pause"}
-          </Button>
+          {timer > 0 && (
+            <Button block type={pause ? "primary" : "dashed"} onClick={play}>
+              {pause ? "Play" : "Pause"}
+            </Button>
+          )}
+          {index < developers.length-1 && <Button
+            block
+            danger
+            type={pause ? "primary" : "dashed"}
+            onClick={skip}
+          >
+            Next
+          </Button>}
         </Col>
       </Row>
       <div className="App-progress">

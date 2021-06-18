@@ -38,6 +38,7 @@ function App() {
   const [timerFull, setTimerFull] = useState(0);
   const [globalTimer, setGlobalTimer] = useState(0);
   const [timer, setTimer] = useState(0);
+  const [currentTime, setCurrentTime] = useState(new Date());
   useEffect(() => {
     setDevelopers(developersInput.split("\n"));
   }, [developersInput]);
@@ -55,6 +56,7 @@ function App() {
         setTimer((m) => m - 1);
       }
       setGlobalTimer((m) => m - 1);
+      setCurrentTime(new Date());
     }, interval);
     return () => {
       clearTimeout(t);
@@ -148,6 +150,7 @@ function App() {
           strokeWidth={1}
           percent={Math.round((globalTimer / time) * 100)}
         ></Progress>
+        {currentTime.toLocaleTimeString()}
       </div>
     </div>
   );

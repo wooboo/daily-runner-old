@@ -39,16 +39,19 @@ function App() {
   const [globalTimer, setGlobalTimer] = useState(0);
   const [timer, setTimer] = useState(0);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const devCount = developers.length;
   useEffect(() => {
-    setDevelopers(developersInput.split("\n"));
+    if(developersInput){
+      setDevelopers(developersInput.split("\n").filter((s) => !s.startsWith("-")));
+    }
   }, [developersInput]);
 
   useEffect(() => {
-    setTimer(Math.round(time / developers.length));
-    setTimerFull(Math.round(time / developers.length));
+    setTimer(Math.round(time / devCount));
+    setTimerFull(Math.round(time / devCount));
     setGlobalTimer(time);
     setIndex(0);
-  }, [developers, setIndex, setTimer, time]);
+  }, [devCount, setIndex, setTimer, time]);
 
   useEffect(() => {
     const t = setTimeout(() => {
@@ -64,11 +67,9 @@ function App() {
   }, [index, timer, globalTimer, setTimer, pause]);
   useEffect(() => {
     if (timer <= 0) {
-      // setTimer(Math.round(time / developers.length));
       setPause(true);
-      // setIndex((i) => i + 1);
     }
-  }, [timer, time, developers]);
+  }, [timer]);
 
   useEffect(() => {
     localStorage.setItem("time", JSON.stringify(time));
@@ -76,11 +77,11 @@ function App() {
   }, [time, developersInput]);
 
   const randomize = () => {
-    setDevelopersInput(shuffle(developers).join("\n"));
+    setDevelopersInput(shuffle(developersInput.split("\n")).join("\n"));
   };
   const skip = () => {
     setIndex((i) => i + 1);
-    setTimer(Math.round(time / developers.length));
+    setTimer(Math.round(time / devCount));
     setPause(false);
   };
   const play = () => {
@@ -109,14 +110,16 @@ function App() {
               {pause ? "Play" : "Pause"}
             </Button>
           )}
-          {index < developers.length-1 && <Button
-            block
-            danger
-            type={pause ? "primary" : "dashed"}
-            onClick={skip}
-          >
-            Next
-          </Button>}
+          {index < developers.length - 1 && (
+            <Button
+              block
+              danger
+              type={pause ? "primary" : "dashed"}
+              onClick={skip}
+            >
+              Next
+            </Button>
+          )}
         </Col>
       </Row>
       <div className="App-progress">

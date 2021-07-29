@@ -1,4 +1,11 @@
-import { Button, Input, InputNumber, Progress, Row, Col } from "antd";
+import { Button, Input, InputNumber, Progress, Tooltip } from "antd";
+
+import {
+  ReloadOutlined,
+  FastForwardOutlined,
+  PauseOutlined,
+  CaretRightOutlined,
+} from "@ant-design/icons";
 import "antd/dist/antd.css";
 import "./App.css";
 import React, { useEffect, useState } from "react";
@@ -41,8 +48,10 @@ function App() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const devCount = developers.length;
   useEffect(() => {
-    if(developersInput){
-      setDevelopers(developersInput.split("\n").filter((s) => !s.startsWith("-")));
+    if (developersInput) {
+      setDevelopers(
+        developersInput.split("\n").filter((s) => !s.startsWith("-"))
+      );
     }
   }, [developersInput]);
 
@@ -89,39 +98,26 @@ function App() {
   };
   return (
     <div className="App">
-      <Row gutter={10}>
-        <Col span={12}>
-          <TextArea
-            rows={8}
-            value={developersInput}
-            onChange={(o) => setDevelopersInput(o.target.value)}
-          ></TextArea>
-        </Col>
-        <Col span={12}>
-          <label>
-            <InputNumber value={time / 60} onChange={(o) => setTime(o * 60)} />
-            minutes
-          </label>
-          <Button block onClick={randomize}>
-            Randomize
-          </Button>
-          {timer > 0 && (
-            <Button block type={pause ? "primary" : "dashed"} onClick={play}>
-              {pause ? "Play" : "Pause"}
-            </Button>
-          )}
-          {index < developers.length - 1 && (
-            <Button
-              block
-              danger
-              type={pause ? "primary" : "dashed"}
-              onClick={skip}
-            >
-              Next
-            </Button>
-          )}
-        </Col>
-      </Row>
+      <label>
+        <InputNumber value={time / 60} onChange={(o) => setTime(o * 60)} />
+        minutes
+      </label>
+      <div className="App-developers">
+        <TextArea
+          rows={8}
+          value={developersInput}
+          onChange={(o) => setDevelopersInput(o.target.value)}
+        ></TextArea>
+        <Tooltip title="Shuffle">
+          <Button
+            className="App-shuffleButton"
+            type="primary"
+            shape="circle"
+            icon={<ReloadOutlined />}
+            onClick={randomize}
+          />
+        </Tooltip>
+      </div>
       <div className="App-progress">
         <Progress
           type="dashboard"
@@ -153,6 +149,39 @@ function App() {
           strokeWidth={1}
           percent={Math.round((globalTimer / time) * 100)}
         ></Progress>
+        <div className="App-buttons">
+        {timer > 0 &&
+          (pause ? (
+            <Tooltip title="Play">
+              <Button
+                danger
+                type={pause ? "primary" : "dashed"}
+                shape="circle"
+                icon={<CaretRightOutlined />}
+                onClick={play}
+              />
+            </Tooltip>
+          ) : (
+            <Tooltip title="Pause">
+              <Button
+                type={pause ? "primary" : "dashed"}
+                shape="circle"
+                icon={<PauseOutlined />}
+                onClick={play}
+              />
+            </Tooltip>
+          ))}
+        {index < developers.length - 1 && (
+          <Tooltip title="Next">
+            <Button
+              type={pause ? "primary" : "dashed"}
+              shape="circle"
+              icon={<FastForwardOutlined />}
+              onClick={skip}
+            />
+          </Tooltip>
+        )}
+        </div>
         {currentTime.toLocaleTimeString()}
       </div>
     </div>

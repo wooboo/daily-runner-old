@@ -8,3 +8,14 @@
 .App-progress {
   padding-top: 10px;
 }
+.App-developers {
+  position: relative;
+}
+.App-buttons>* {
+  margin: 5px;
+}
+.App-shuffleButton {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+}

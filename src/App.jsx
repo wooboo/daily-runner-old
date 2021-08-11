@@ -86,7 +86,11 @@ function App() {
   }, [time, developersInput]);
 
   const randomize = () => {
-    setDevelopersInput(shuffle(developersInput.split("\n")).join("\n"));
+    const splitted = developersInput.split("\n");
+    const last = shuffle(splitted.filter(s=>s.startsWith('_')));
+    const disabled = shuffle(splitted.filter(s=>s.startsWith('-')));
+    const other = shuffle(splitted.filter(s=>!s.startsWith('-') && !s.startsWith('_')));
+    setDevelopersInput([...other, ...last, ...disabled].join("\n"));
   };
   const skip = () => {
     setIndex((i) => i + 1);
@@ -126,7 +130,7 @@ function App() {
               type="dashboard"
               format={() => (
                 <>
-                  {developers[index]}
+                  {developers[index].replace(/^[-_]/,'')}
                   <br />
                   {timer}s
                 </>
@@ -154,7 +158,7 @@ function App() {
           (pause ? (
             <Tooltip title="Play">
               <Button
-                danger
+                style={{ background: "rgb(82, 196, 26)", borderColor:"rgb(82, 196, 26)" }}
                 type={pause ? "primary" : "dashed"}
                 shape="circle"
                 icon={<CaretRightOutlined />}

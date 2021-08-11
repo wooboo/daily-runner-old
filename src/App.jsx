@@ -130,7 +130,7 @@ function App() {
               type="dashboard"
               format={() => (
                 <>
-                  {developers[index].replace(/^[-_]/,'')}
+                  {developers[index]?.replace(/^[-_]/,'')}
                   <br />
                   {timer}s
                 </>

@@ -1,5 +1,5 @@
 import { Button, Input, InputNumber, Progress, Tooltip } from "antd";
-
+import { add } from "date-fns";
 import {
   ReloadOutlined,
   FastForwardOutlined,
@@ -60,7 +60,7 @@ function App() {
     setTimerFull(Math.round(time / devCount));
     setGlobalTimer(time);
     setIndex(0);
-  }, [devCount, setIndex, setTimer, time]);
+  }, [devCount, developers, setIndex, setTimer, time]);
 
   useEffect(() => {
     const t = setTimeout(() => {
@@ -87,9 +87,11 @@ function App() {
 
   const randomize = () => {
     const splitted = developersInput.split("\n");
-    const last = shuffle(splitted.filter(s=>s.startsWith('_')));
-    const disabled = shuffle(splitted.filter(s=>s.startsWith('-')));
-    const other = shuffle(splitted.filter(s=>!s.startsWith('-') && !s.startsWith('_')));
+    const last = shuffle(splitted.filter((s) => s.startsWith("_")));
+    const disabled = shuffle(splitted.filter((s) => s.startsWith("-")));
+    const other = shuffle(
+      splitted.filter((s) => !s.startsWith("-") && !s.startsWith("_"))
+    );
     setDevelopersInput([...other, ...last, ...disabled].join("\n"));
   };
   const skip = () => {
@@ -97,96 +99,107 @@ function App() {
     setTimer(Math.round(time / devCount));
     setPause(false);
   };
+  const perDevTime = Math.round(time / devCount);
+  const devsLeft = devCount - index - 1;
+
+  const timeLeft = perDevTime * devsLeft + timer;
+  const estimatedFinish = add(currentTime, { seconds: timeLeft });
   const play = () => {
     setPause((p) => !p);
   };
   return (
     <div className="App">
-      <label>
-        <InputNumber value={time / 60} onChange={(o) => setTime(o * 60)} />
-        minutes
-      </label>
-      <div className="App-developers">
-        <TextArea
-          rows={8}
-          value={developersInput}
-          onChange={(o) => setDevelopersInput(o.target.value)}
-        ></TextArea>
-        <Tooltip title="Shuffle">
-          <Button
-            className="App-shuffleButton"
-            type="primary"
-            shape="circle"
-            icon={<ReloadOutlined />}
-            onClick={randomize}
-          />
-        </Tooltip>
-      </div>
-      <div className="App-progress">
-        <Progress
-          type="dashboard"
-          format={() => (
-            <Progress
-              type="dashboard"
-              format={() => (
-                <>
-                  {developers[index]?.replace(/^[-_]/,'')}
-                  <br />
-                  {timer}s
-                </>
-              )}
-              status={timer / timerFull > 0.15 ? "normal" : "exception"}
-              width={275}
-              strokeColor={{
-                "0%": "#108ee9",
-                "100%": "#87d068",
-              }}
-              strokeWidth={6}
-              percent={Math.round((timer / timerFull) * 100)}
-            ></Progress>
-          )}
-          width={300}
-          strokeColor={{
-            "0%": "#108ee9",
-            "100%": "#87d068",
-          }}
-          strokeWidth={1}
-          percent={Math.round((globalTimer / time) * 100)}
-        ></Progress>
-        <div className="App-buttons">
-        {timer > 0 &&
-          (pause ? (
-            <Tooltip title="Play">
-              <Button
-                style={{ background: "rgb(82, 196, 26)", borderColor:"rgb(82, 196, 26)" }}
-                type={pause ? "primary" : "dashed"}
-                shape="circle"
-                icon={<CaretRightOutlined />}
-                onClick={play}
-              />
-            </Tooltip>
-          ) : (
-            <Tooltip title="Pause">
-              <Button
-                type={pause ? "primary" : "dashed"}
-                shape="circle"
-                icon={<PauseOutlined />}
-                onClick={play}
-              />
-            </Tooltip>
-          ))}
-        {index < developers.length - 1 && (
-          <Tooltip title="Next">
-            <Button
-              type={pause ? "primary" : "dashed"}
+      <div className="App-timer">
+        <label>
+          <InputNumber value={time / 60} onChange={(o) => setTime(o * 60)} />
+          minutes
+        </label>
+        <div className="App-developers">
+          <TextArea
+            rows={8}
+            value={developersInput}
+            onChange={(o) => setDevelopersInput(o.target.value)}
+            disabled={!pause}
+          ></TextArea>
+          <Tooltip title="Shuffle">
+            {pause && <Button
+              className="App-shuffleButton"
+              type="primary"
               shape="circle"
-              icon={<FastForwardOutlined />}
-              onClick={skip}
-            />
+              icon={<ReloadOutlined />}
+              onClick={randomize}
+            />}
           </Tooltip>
-        )}
         </div>
-        {currentTime.toLocaleTimeString()}
+        <div className="App-progress">
+          <Progress
+            type="dashboard"
+            format={() => (
+              <Progress
+                type="dashboard"
+                format={() => (
+                  <>
+                    {developers[index]?.replace(/^[-_]/, "")}
+                    <br />
+                    {timer}s
+                  </>
+                )}
+                status={timer / timerFull > 0.15 ? "normal" : "exception"}
+                width={275}
+                strokeColor={{
+                  "0%": "#108ee9",
+                  "100%": "#87d068",
+                }}
+                strokeWidth={6}
+                percent={Math.round((timer / timerFull) * 100)}
+              ></Progress>
+            )}
+            width={300}
+            strokeColor={{
+              "0%": "#108ee9",
+              "100%": "#87d068",
+            }}
+            strokeWidth={1}
+            percent={Math.round((globalTimer / time) * 100)}
+          ></Progress>
+          <div className="App-buttons">
+            {timer > 0 &&
+              (pause ? (
+                <Tooltip title="Play">
+                  <Button
+                    style={{
+                      background: "rgb(82, 196, 26)",
+                      borderColor: "rgb(82, 196, 26)",
+                    }}
+                    type={pause ? "primary" : "dashed"}
+                    shape="circle"
+                    icon={<CaretRightOutlined />}
+                    onClick={play}
+                  />
+                </Tooltip>
+              ) : (
+                <Tooltip title="Pause">
+                  <Button
+                    type={pause ? "primary" : "dashed"}
+                    shape="circle"
+                    icon={<PauseOutlined />}
+                    onClick={play}
+                  />
+                </Tooltip>
+              ))}
+            {index < developers.length - 1 && (
+              <Tooltip title="Next">
+                <Button
+                  type={pause ? "primary" : "dashed"}
+                  shape="circle"
+                  icon={<FastForwardOutlined />}
+                  onClick={skip}
+                />
+              </Tooltip>
+            )}
+          </div>
+          <strong>Will finish: {estimatedFinish.toLocaleTimeString()}</strong>
+        </div>
       </div>
     </div>
   );

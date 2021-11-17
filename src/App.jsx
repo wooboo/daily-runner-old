@@ -37,6 +37,7 @@ function App() {
     localStorage.getItem("developers")
   );
   const [developers, setDevelopers] = useState([]);
+  const [teams, setTeams] = useState({});
   const [time, setTime] = useState(
     JSON.parse(localStorage.getItem("time") ?? "0")
   );
@@ -49,6 +50,21 @@ function App() {
   const devCount = developers.length;
   useEffect(() => {
     if (developersInput) {
+      const rows = developersInput.split("\n");
+      const sets = rows.reduce(
+        (acc, row) => {
+          const match = row.match(/^---(.*)---$/);
+          if (match) {
+            acc.current = match[1];
+          } else {
+            acc.teams[acc.current] = acc.teams[acc.current] || [];
+            acc.teams[acc.current].push(row);
+          }
+          return acc;
+        },
+        { current: null, teams: {} }
+      );
+      setTeams(sets.teams);
       setDevelopers(
         developersInput.split("\n").filter((s) => !s.startsWith("-"))
       );
@@ -86,13 +102,21 @@ function App() {
   }, [time, developersInput]);
 
   const randomize = () => {
-    const splitted = developersInput.split("\n");
-    const last = shuffle(splitted.filter((s) => s.startsWith("_")));
-    const disabled = shuffle(splitted.filter((s) => s.startsWith("-")));
-    const other = shuffle(
-      splitted.filter((s) => !s.startsWith("-") && !s.startsWith("_"))
-    );
-    setDevelopersInput([...other, ...last, ...disabled].join("\n"));
+    const shuffledTeams = Object.entries(teams).map(([team, devs]) => {
+      const last = shuffle(devs.filter((s) => s.startsWith("_")));
+      const disabled = shuffle(devs.filter((s) => s.startsWith("-")));
+      const other = shuffle(
+        devs.filter((s) => !s.startsWith("-") && !s.startsWith("_"))
+      );
+      return [team, [...other, ...last, ...disabled]];
+    }).reduce((acc, [team, devs]) => {
+      acc[team] = devs;
+      return acc;
+    }, {});
+    setTeams(shuffledTeams);
+    
+    setDevelopersInput(Object.entries(teams).map(([team, devs]) => `---${team}---\n${devs.join("\n")}`).join("\n"));
+
   };
   const skip = () => {
     setIndex((i) => i + 1);
@@ -122,13 +146,15 @@ function App() {
             disabled={!pause}
           ></TextArea>
           <Tooltip title="Shuffle">
-            {pause && <Button
-              className="App-shuffleButton"
-              type="primary"
-              shape="circle"
-              icon={<ReloadOutlined />}
-              onClick={randomize}
-            />}
+            {pause && (
+              <Button
+                className="App-shuffleButton"
+                type="primary"
+                shape="circle"
+                icon={<ReloadOutlined />}
+                onClick={randomize}
+              />
+            )}
           </Tooltip>
         </div>
         <div className="App-progress">

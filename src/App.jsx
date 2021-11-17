@@ -115,7 +115,7 @@ function App() {
     }, {});
     setTeams(shuffledTeams);
     
-    setDevelopersInput(Object.entries(teams).map(([team, devs]) => `---${team}---\n${devs.join("\n")}`).join("\n"));
+    setDevelopersInput(Object.entries(shuffledTeams).map(([team, devs]) => `---${team}---\n${devs.join("\n")}`).join("\n"));
 
   };
   const skip = () => {

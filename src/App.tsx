@@ -11,7 +11,7 @@ import "./App.css";
 import React, { useEffect, useState } from "react";
 
 const { TextArea } = Input;
-function shuffle(array) {
+function shuffle<T>(array: T[]):T[] {
   var currentIndex = array.length,
     temporaryValue,
     randomIndex;
@@ -31,13 +31,14 @@ function shuffle(array) {
   return array;
 }
 const interval = 1000;
+type Teams = Record<string,string[]>;
 function App() {
   // Create the count state.
   const [developersInput, setDevelopersInput] = useState(
     localStorage.getItem("developers")
   );
-  const [developers, setDevelopers] = useState([]);
-  const [teams, setTeams] = useState({});
+  const [developers, setDevelopers] = useState<string[]>([]);
+  const [teams, setTeams] = useState<Teams>({});
   const [time, setTime] = useState(
     JSON.parse(localStorage.getItem("time") ?? "0")
   );
@@ -50,8 +51,8 @@ function App() {
   const devCount = developers.length;
   useEffect(() => {
     if (developersInput) {
-      const rows = developersInput.split("\n");
-      const sets = rows.reduce(
+      const rows = developersInput.split("\n").filter(Boolean);
+      const sets = rows.reduce<{current:string, teams:Teams}>(
         (acc, row) => {
           const match = row.match(/^---(.*)---$/);
           if (match) {
@@ -62,7 +63,7 @@ function App() {
           }
           return acc;
         },
-        { current: null, teams: {} }
+        { current: "", teams: {} }
       );
       setTeams(sets.teams);
       setDevelopers(
@@ -98,7 +99,8 @@ function App() {
 
   useEffect(() => {
     localStorage.setItem("time", JSON.stringify(time));
-    localStorage.setItem("developers", developersInput);
+    if(developersInput)
+      localStorage.setItem("developers", developersInput);
   }, [time, developersInput]);
 
   const randomize = () => {
@@ -109,8 +111,8 @@ function App() {
         devs.filter((s) => !s.startsWith("-") && !s.startsWith("_"))
       );
       return [team, [...other, ...last, ...disabled]];
-    }).reduce((acc, [team, devs]) => {
-      acc[team] = devs;
+    }).reduce<Teams>((acc, [team, devs]) => {
+      acc[team as string] = devs as string[];
       return acc;
     }, {});
     setTeams(shuffledTeams);
@@ -135,13 +137,13 @@ function App() {
     <div className="App">
       <div className="App-timer">
         <label>
-          <InputNumber value={time / 60} onChange={(o) => setTime(o * 60)} />
+          <InputNumber value={time / 60} onChange={(o) => o && setTime(o * 60)} />
           minutes
         </label>
         <div className="App-developers">
           <TextArea
             rows={8}
-            value={developersInput}
+            value={developersInput!}
             onChange={(o) => setDevelopersInput(o.target.value)}
             disabled={!pause}
           ></TextArea>

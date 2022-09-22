@@ -11,7 +11,7 @@ import "./App.css";
 import React, { useEffect, useState } from "react";
 
 const { TextArea } = Input;
-function shuffle<T>(array: T[]):T[] {
+function shuffle<T>(array: T[]): T[] {
   var currentIndex = array.length,
     temporaryValue,
     randomIndex;
@@ -31,7 +31,7 @@ function shuffle<T>(array: T[]):T[] {
   return array;
 }
 const interval = 1000;
-type Teams = Record<string,string[]>;
+type Teams = Record<string, string[]>;
 function App() {
   // Create the count state.
   const [developersInput, setDevelopersInput] = useState(
@@ -52,9 +52,9 @@ function App() {
   useEffect(() => {
     if (developersInput) {
       const rows = developersInput.split("\n").filter(Boolean);
-      const sets = rows.reduce<{current:string, teams:Teams}>(
+      const sets = rows.reduce<{ current: string, teams: Teams }>(
         (acc, row) => {
-          const match = row.match(/^---(.*)---$/);
+          const match = row.match(/^--(.*)--$/);
           if (match) {
             acc.current = match[1];
           } else {
@@ -99,7 +99,7 @@ function App() {
 
   useEffect(() => {
     localStorage.setItem("time", JSON.stringify(time));
-    if(developersInput)
+    if (developersInput)
       localStorage.setItem("developers", developersInput);
   }, [time, developersInput]);
 
@@ -116,8 +116,8 @@ function App() {
       return acc;
     }, {});
     setTeams(shuffledTeams);
-    
-    setDevelopersInput(Object.entries(shuffledTeams).map(([team, devs]) => `---${team}---\n${devs.join("\n")}`).join("\n"));
+
+    setDevelopersInput(Object.entries(shuffledTeams).map(([team, devs]) => `--${team}--\n${devs.join("\n")}`).join("\n"));
 
   };
   const skip = () => {
